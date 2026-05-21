@@ -1,0 +1,63 @@
+name: publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to push (e.g. v0.1.0)"
+        required: true
+
+env:
+  IMAGE_NAMESPACE: ${{ vars.VP_IMAGE_NAMESPACE || 'vibepod' }}
+  IMAGE_NAME: skills-engine
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Resolve tag
+        id: tag
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+      - name: SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.tag }}
+          format: sarif
+          output: trivy.sarif
+          exit-code: 0
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scan-artifacts
+          path: |
+            sbom.spdx.json
+            trivy.sarif
