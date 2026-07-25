@@ -36,11 +36,18 @@ The project root is **not** mounted — the engine only writes to skill director
 
 | Priority | Source       | Locator example                                    |
 |----------|--------------|----------------------------------------------------|
-| 1        | Local folder | `./skills/foo` or `/abs/path`                      |
+| 1        | Local folder | `skills/foo`, `./skills/foo`, `/abs/path`, `.`, `~/skills/foo` |
 | 2        | GitHub       | `github:org/repo//skills/foo#v1.0.0`               |
 | 3        | npm          | `npm:@acme/vibepod-skill-foo@1.2.0`                |
 | 4        | GitLab       | `gitlab:group/repo//skills/foo#main`               |
 | 5        | Generic Git  | `https://git.example.com/org/repo.git//skills/foo` |
+
+Any locator that carries no scheme is treated as a filesystem path — relative
+paths resolve against the process working directory, and a leading `~` expands to
+the current user's home directory. Locators that look scheme-like but are not
+supported (`ftp://…`, `mailto:…`) are rejected with `Unrecognized locator`. A
+directory whose first path segment contains a colon must therefore be written
+with a leading `./`.
 
 ## Development
 

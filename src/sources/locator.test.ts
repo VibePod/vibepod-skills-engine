@@ -16,6 +16,79 @@ describe("parseLocator", () => {
     expect(parseLocator("/abs/path")).toMatchObject({ type: "local", path: "/abs/path" });
   });
 
+  it("parses bare relative paths as local", () => {
+    expect(parseLocator("skills/foo")).toEqual({
+      type: "local",
+      raw: "skills/foo",
+      path: "skills/foo",
+    });
+  });
+
+  it("parses the current directory as local", () => {
+    expect(parseLocator(".")).toMatchObject({ type: "local", path: "." });
+  });
+
+  it("parses the parent directory as local", () => {
+    expect(parseLocator("..")).toMatchObject({ type: "local", path: ".." });
+  });
+
+  it("parses tilde paths as local", () => {
+    expect(parseLocator("~/skills/foo")).toMatchObject({
+      type: "local",
+      path: "~/skills/foo",
+    });
+  });
+
+  it("trims surrounding whitespace on local paths", () => {
+    expect(parseLocator("  skills/foo  ")).toMatchObject({
+      type: "local",
+      path: "skills/foo",
+    });
+  });
+
+  it("parses generic https git URL without a subpath", () => {
+    expect(parseLocator("https://git.example.com/org/repo.git#main")).toMatchObject({
+      type: "git",
+      url: "https://git.example.com/org/repo.git",
+      subpath: undefined,
+      ref: "main",
+    });
+  });
+
+  it("parses scp-style git URL with a subpath", () => {
+    expect(parseLocator("git@git.example.com:org/repo.git//skills/foo#v1")).toMatchObject({
+      type: "git",
+      url: "git@git.example.com:org/repo.git",
+      subpath: "skills/foo",
+      ref: "v1",
+    });
+  });
+
+  it("parses Windows drive paths as local, not as a scheme", () => {
+    expect(parseLocator("C:/dev/skills/foo")).toMatchObject({
+      type: "local",
+      path: "C:/dev/skills/foo",
+    });
+    expect(parseLocator("C:\\dev\\skills\\foo")).toMatchObject({
+      type: "local",
+      path: "C:\\dev\\skills\\foo",
+    });
+  });
+
+  it("still rejects unknown schemes rather than treating them as paths", () => {
+    expect(() => parseLocator("ftp://example.com/foo")).toThrow(/Unrecognized locator/);
+    expect(() => parseLocator("mailto:someone@example.com")).toThrow(/Unrecognized locator/);
+  });
+
+  it("still enforces the trusted-sources allowlist for bare paths", () => {
+    process.env.VIBEPOD_TRUSTED_SOURCES = "github:vibepod/";
+    try {
+      expect(() => parseLocator("skills/foo")).toThrow(/VIBEPOD_TRUSTED_SOURCES/);
+    } finally {
+      delete process.env.VIBEPOD_TRUSTED_SOURCES;
+    }
+  });
+
   it("parses github with subpath and ref", () => {
     const parsed = parseLocator("github:vibepod/vibepod-skills//skills/researcher#v1.0.0");
     expect(parsed).toMatchObject({
