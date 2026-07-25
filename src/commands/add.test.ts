@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addCommand } from "./add.js";
 import { listCommand } from "./list.js";
@@ -133,6 +133,31 @@ it("detects a skills/ subdirectory as a bundle (obra/superpowers shape)", async 
 
   const lock = JSON.parse(await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"));
   expect(lock.skills.alpha.source.locator).toBe(`${root}/skills/alpha`);
+});
+
+it("installs a skill from a bare relative path", async () => {
+  const src = path.join(tmp, "bare-src");
+  await fs.mkdir(src, { recursive: true });
+  await fs.writeFile(
+    path.join(src, "SKILL.md"),
+    "---\nname: Bare\ndescription: Installed from a bare path.\nversion: 0.1.0\n---\nbody\n",
+    "utf-8",
+  );
+
+  const cwd = vi.spyOn(process, "cwd").mockReturnValue(tmp);
+  try {
+    const rc = await addCommand({ locator: "bare-src", scope: "local" });
+    expect(rc).toBe(0);
+  } finally {
+    cwd.mockRestore();
+  }
+
+  await expect(
+    fs.access(path.join(localSkills, "installed", "bare", "SKILL.md")),
+  ).resolves.toBeUndefined();
+
+  const lock = JSON.parse(await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"));
+  expect(lock.skills.bare.source.locator).toBe("bare-src");
 });
 
 it("rejects --id when installing a bundle", async () => {

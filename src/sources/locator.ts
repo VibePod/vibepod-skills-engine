@@ -2,6 +2,9 @@ import type { ParsedLocator, ResolvedSource } from "./types.js";
 
 const GIT_RE = /^([a-z]+):([^#]+?)(?:\/\/([^#]+))?(?:#(.+))?$/;
 const NPM_RE = /^npm:(.+?)(?:@([^@/]+))?$/;
+// Two or more characters before the colon: every locator scheme we support is
+// longer than one character, so a single letter is a Windows drive ("C:\...").
+const SCHEME_RE = /^[A-Za-z][A-Za-z0-9+.-]+:/;
 
 function enforceTrustedSources(locator: string): void {
   const allowList = process.env.VIBEPOD_TRUSTED_SOURCES;
@@ -76,10 +79,6 @@ export function parseLocator(raw: string): ParsedLocator {
 
   enforceTrustedSources(trimmed);
 
-  if (trimmed.startsWith("./") || trimmed.startsWith("../") || trimmed.startsWith("/")) {
-    return { type: "local", raw: trimmed, path: trimmed };
-  }
-
   if (trimmed.startsWith("npm:")) {
     const match = NPM_RE.exec(trimmed);
     if (!match) throw new Error(`Invalid npm locator: ${raw}`);
@@ -104,17 +103,27 @@ export function parseLocator(raw: string): ParsedLocator {
     const hashIdx = trimmed.indexOf("#");
     const ref = hashIdx >= 0 ? trimmed.slice(hashIdx + 1) : undefined;
     const noRef = hashIdx >= 0 ? trimmed.slice(0, hashIdx) : trimmed;
-    const sub = noRef.indexOf("//");
+    // Look for the "//" subpath separator *after* the scheme, otherwise the
+    // "//" in "https://" is mistaken for it and no subpath is ever split off.
+    const schemeIdx = noRef.indexOf("://");
+    const searchFrom = schemeIdx >= 0 ? schemeIdx + 3 : 0;
+    const sub = noRef.indexOf("//", searchFrom);
     let url = noRef;
     let subpath: string | undefined;
-    if (sub > 0 && noRef.indexOf("://") !== sub - 1) {
+    if (sub > searchFrom) {
       url = noRef.slice(0, sub);
       subpath = noRef.slice(sub + 2);
     }
     return { type: "git", raw: trimmed, url, subpath, ref };
   }
 
-  throw new Error(
-    `Unrecognized locator: ${raw}. Expected ./path, /abs/path, npm:..., github:..., gitlab:..., or https://...`,
-  );
+  if (SCHEME_RE.test(trimmed)) {
+    throw new Error(
+      `Unrecognized locator: ${raw}. Expected a filesystem path, npm:..., github:..., gitlab:..., or https://...`,
+    );
+  }
+
+  // Anything left carries no scheme, so treat it as a filesystem path:
+  // "skills/foo", "./skills/foo", "/abs/path", ".", "..", "~/skills/foo".
+  return { type: "local", raw: trimmed, path: trimmed };
 }
