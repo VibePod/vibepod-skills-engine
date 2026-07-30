@@ -1,7 +1,7 @@
-import fsExtra from "fs-extra";
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
+import fsExtra from "fs-extra";
 
 export async function exists(p: string): Promise<boolean> {
   try {
@@ -62,7 +62,11 @@ export async function sha256Dir(dir: string): Promise<string> {
   return hash.digest("hex");
 }
 
-async function collect(dir: string, root: string, out: string[]): Promise<void> {
+async function collect(
+  dir: string,
+  root: string,
+  out: string[],
+): Promise<void> {
   const items = await fs.readdir(dir, { withFileTypes: true });
   for (const item of items) {
     const abs = path.join(dir, item.name);

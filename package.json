@@ -1,7 +1,7 @@
 {
   "name": "vibepod-skills-engine",
   "version": "0.1.0",
-  "description": "VibePod Skills Engine — installs, validates, and manages skills inside a controlled container.",
+  "description": "VibePod Skills Engine \u2014 installs, validates, and manages skills inside a controlled container.",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js",
     "dev": "tsx src/cli.ts",
-    "lint": "eslint . --ext .ts",
+    "lint": "biome check .",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -36,11 +36,9 @@
     "@types/node": "^22.5.5",
     "@types/pacote": "^11.1.8",
     "@types/tar": "^6.1.13",
-    "@typescript-eslint/eslint-plugin": "^8.7.0",
-    "@typescript-eslint/parser": "^8.7.0",
-    "eslint": "^9.10.0",
     "tsx": "^4.19.1",
     "typescript": "^5.6.2",
-    "vitest": "^2.1.1"
+    "vitest": "^2.1.1",
+    "@biomejs/biome": "^2.5.6"
   }
 }

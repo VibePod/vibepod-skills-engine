@@ -1,7 +1,15 @@
 import path from "node:path";
 
-import { loadLockfile, removeLockEntry, saveLockfile } from "../registry/lockfile.js";
-import { loadRegistry, removeRegistryEntry, saveRegistry } from "../registry/registry.js";
+import {
+  loadLockfile,
+  removeLockEntry,
+  saveLockfile,
+} from "../registry/lockfile.js";
+import {
+  loadRegistry,
+  removeRegistryEntry,
+  saveRegistry,
+} from "../registry/registry.js";
 import { removeDir } from "../utils/fs.js";
 import { emit, flush, logError, logSuccess } from "../utils/output.js";
 import { paths, type Scope } from "../utils/paths.js";
@@ -21,7 +29,10 @@ export async function deleteCommand(opts: DeleteOptions): Promise<number> {
 
   if (!inRegistry && !inLock) {
     logError(`Skill "${id}" not found in ${scope} scope`);
-    emit({ command: "delete", id, scope, removed: false }, () => `Skill ${id} not found`);
+    emit(
+      { command: "delete", id, scope, removed: false },
+      () => `Skill ${id} not found`,
+    );
     flush();
     return 1;
   }
@@ -32,8 +43,9 @@ export async function deleteCommand(opts: DeleteOptions): Promise<number> {
   const installPath = path.join(paths(scope).installed, id);
   await removeDir(installPath);
 
-  emit({ command: "delete", id, scope, removed: true, path: installPath }, () =>
-    `Removed ${id} from ${scope} scope`,
+  emit(
+    { command: "delete", id, scope, removed: true, path: installPath },
+    () => `Removed ${id} from ${scope} scope`,
   );
   flush();
   logSuccess(`Deleted ${id}`);

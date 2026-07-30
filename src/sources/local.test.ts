@@ -3,9 +3,8 @@ import os from "node:os";
 import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-
-import { parseLocator } from "./locator.js";
 import { fetchLocal } from "./local.js";
+import { parseLocator } from "./locator.js";
 import type { FetchContext } from "./types.js";
 
 let tmp: string;
@@ -13,7 +12,9 @@ let originalHome: string | undefined;
 const ctx: FetchContext = { cacheDir: "/tmp/unused-cache" };
 
 beforeEach(async () => {
-  tmp = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), "vp-local-")));
+  tmp = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "vp-local-")),
+  );
   originalHome = process.env.HOME;
 });
 
@@ -56,9 +57,9 @@ describe("fetchLocal", () => {
   });
 
   it("reports a missing path clearly", async () => {
-    await expect(fetchLocal(parseLocator(path.join(tmp, "nope")), ctx)).rejects.toThrow(
-      /Local skill path does not exist/,
-    );
+    await expect(
+      fetchLocal(parseLocator(path.join(tmp, "nope")), ctx),
+    ).rejects.toThrow(/Local skill path does not exist/);
   });
 
   it("reports a non-directory path clearly", async () => {

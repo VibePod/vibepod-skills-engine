@@ -9,7 +9,10 @@ const SCHEME_RE = /^[A-Za-z][A-Za-z0-9+.-]+:/;
 function enforceTrustedSources(locator: string): void {
   const allowList = process.env.VIBEPOD_TRUSTED_SOURCES;
   if (!allowList) return;
-  const prefixes = allowList.split(",").map((s) => s.trim()).filter(Boolean);
+  const prefixes = allowList
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (prefixes.length === 0) return;
   if (prefixes.some((prefix) => locator.startsWith(prefix))) return;
   throw new Error(
@@ -26,7 +29,10 @@ function enforceTrustedSources(locator: string): void {
  * Local:       ./bundle                          + foo → ./bundle/foo
  * Generic git: https://host/repo.git//skills#ref + foo → https://host/repo.git//skills/foo#ref
  */
-export function expandBundleLocator(bundleLocator: string, subdir: string): string {
+export function expandBundleLocator(
+  bundleLocator: string,
+  subdir: string,
+): string {
   const parsed = parseLocator(bundleLocator);
   if (parsed.type === "npm") {
     throw new Error("Bundle install is not supported for npm sources");
@@ -53,7 +59,10 @@ export function expandBundleLocator(bundleLocator: string, subdir: string): stri
  *  - npm sources → pin to the resolved package version
  *  - local      → unchanged (paths have no version concept)
  */
-export function pinLocatorToResolved(rawLocator: string, resolved: ResolvedSource): string {
+export function pinLocatorToResolved(
+  rawLocator: string,
+  resolved: ResolvedSource,
+): string {
   if (resolved.type === "local") return rawLocator;
 
   if (resolved.type === "npm") {
@@ -99,7 +108,11 @@ export function parseLocator(raw: string): ParsedLocator {
     };
   }
 
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://") || trimmed.startsWith("git@")) {
+  if (
+    trimmed.startsWith("http://") ||
+    trimmed.startsWith("https://") ||
+    trimmed.startsWith("git@")
+  ) {
     const hashIdx = trimmed.indexOf("#");
     const ref = hashIdx >= 0 ? trimmed.slice(hashIdx + 1) : undefined;
     const noRef = hashIdx >= 0 ? trimmed.slice(0, hashIdx) : trimmed;

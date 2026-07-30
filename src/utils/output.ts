@@ -16,7 +16,10 @@ export function configureOutput(opts: OutputOptions): void {
   state.buffered = [];
 }
 
-export function emit(record: Record<string, unknown>, humanFn?: () => string): void {
+export function emit(
+  record: Record<string, unknown>,
+  humanFn?: () => string,
+): void {
   if (state.json) {
     state.buffered.push(record);
     return;

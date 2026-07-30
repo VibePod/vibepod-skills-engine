@@ -1,6 +1,6 @@
 import { loadRegistry } from "../registry/registry.js";
 import { emit, flush, logError, logInfo, logSuccess } from "../utils/output.js";
-import { type Scope } from "../utils/paths.js";
+import type { Scope } from "../utils/paths.js";
 import { addCommand } from "./add.js";
 
 export interface UpdateOptions {
@@ -12,7 +12,10 @@ export async function updateCommand(opts: UpdateOptions): Promise<number> {
   const reg = await loadRegistry(opts.scope);
   const ids = opts.id ? [opts.id] : Object.keys(reg.skills);
   if (ids.length === 0) {
-    emit({ command: "update", scope: opts.scope, updated: [] }, () => "Nothing to update");
+    emit(
+      { command: "update", scope: opts.scope, updated: [] },
+      () => "Nothing to update",
+    );
     flush();
     return 0;
   }
@@ -34,8 +37,9 @@ export async function updateCommand(opts: UpdateOptions): Promise<number> {
     if (rc === 0) updated.push(id);
     else failed.push({ id, error: `add returned ${rc}` });
   }
-  emit({ command: "update", scope: opts.scope, updated, failed }, () =>
-    `Updated ${updated.length}, failed ${failed.length}`,
+  emit(
+    { command: "update", scope: opts.scope, updated, failed },
+    () => `Updated ${updated.length}, failed ${failed.length}`,
   );
   flush();
   if (failed.length > 0) return 1;

@@ -1,10 +1,10 @@
 import path from "node:path";
 
 import { loadLockfile } from "../registry/lockfile.js";
-import type { LockEntry } from "../validation/skill-schema.js";
 import { exists } from "../utils/fs.js";
 import { emit, flush } from "../utils/output.js";
 import { bothScopes, paths, type Scope } from "../utils/paths.js";
+import type { LockEntry } from "../validation/skill-schema.js";
 
 export interface ResolveOptions {
   scope?: Scope;
@@ -44,8 +44,8 @@ export async function resolveCommand(opts: ResolveOptions): Promise<number> {
   const losers: ResolvedSkill[] = [];
 
   // user first, then local — local overwrites
-  const ordered = [...entries].sort((a, b) =>
-    (a.scope === "user" ? 0 : 1) - (b.scope === "user" ? 0 : 1),
+  const ordered = [...entries].sort(
+    (a, b) => (a.scope === "user" ? 0 : 1) - (b.scope === "user" ? 0 : 1),
   );
 
   for (const { entry, scope } of ordered) {

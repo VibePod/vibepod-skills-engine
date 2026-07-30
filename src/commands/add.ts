@@ -1,21 +1,38 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { loadLockfile, saveLockfile, upsertLockEntry } from "../registry/lockfile.js";
+import {
+  loadLockfile,
+  saveLockfile,
+  upsertLockEntry,
+} from "../registry/lockfile.js";
 import {
   loadRegistry,
   saveRegistry,
   upsertRegistryEntry,
 } from "../registry/registry.js";
 import { fetchSource } from "../sources/index.js";
-import { expandBundleLocator, pinLocatorToResolved } from "../sources/locator.js";
+import {
+  expandBundleLocator,
+  pinLocatorToResolved,
+} from "../sources/locator.js";
 import type { ResolvedSource } from "../sources/types.js";
-import { copyDir, ensureDir, exists, removeDir, sha256Dir, symlinkDir } from "../utils/fs.js";
+import {
+  copyDir,
+  ensureDir,
+  exists,
+  removeDir,
+  sha256Dir,
+  symlinkDir,
+} from "../utils/fs.js";
 import { emit, flush, logError, logInfo, logSuccess } from "../utils/output.js";
 import { cacheRoot, paths, type Scope } from "../utils/paths.js";
 import { slugify } from "../utils/slug.js";
-import type { LockEntry, Lockfile } from "../validation/skill-schema.js";
-import type { Registry } from "../validation/skill-schema.js";
+import type {
+  LockEntry,
+  Lockfile,
+  Registry,
+} from "../validation/skill-schema.js";
 import { validateSkill } from "../validation/validate-skill.js";
 
 export interface AddOptions {
@@ -40,12 +57,10 @@ interface InstallOutcome {
 }
 
 async function bundleSubdirs(root: string): Promise<string[]> {
-  let entries;
-  try {
-    entries = await fs.readdir(root, { withFileTypes: true });
-  } catch {
-    return [];
-  }
+  const entries = await fs
+    .readdir(root, { withFileTypes: true })
+    .catch(() => null);
+  if (entries === null) return [];
   const found: string[] = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
@@ -87,7 +102,10 @@ async function installOne(
   idOverride: string | undefined,
   lock: Lockfile,
   registry: Registry,
-): Promise<{ lock: Lockfile; registry: Registry; outcome: InstallOutcome } | { error: string }> {
+): Promise<
+  | { lock: Lockfile; registry: Registry; outcome: InstallOutcome }
+  | { error: string }
+> {
   const validation = await validateSkill(sourceRoot);
   if (!validation.ok || !validation.frontmatter) {
     return { error: `validation failed: ${validation.errors.join("; ")}` };
@@ -178,7 +196,14 @@ export async function addCommand(opts: AddOptions): Promise<number> {
 
   // Single-skill install
   if (hasSkillMd) {
-    const result = await installOne(ctx, sourceRoot, locator, opts.id, lock, registry);
+    const result = await installOne(
+      ctx,
+      sourceRoot,
+      locator,
+      opts.id,
+      lock,
+      registry,
+    );
     if ("error" in result) {
       logError(`SKILL.md validation failed for ${sourceRoot}: ${result.error}`);
       flush();
@@ -199,7 +224,8 @@ export async function addCommand(opts: AddOptions): Promise<number> {
         commit: resolved.commit,
         linked: !!opts.link,
       },
-      () => `Added ${result.outcome.id} (${result.outcome.name}) to ${result.outcome.installDir}`,
+      () =>
+        `Added ${result.outcome.id} (${result.outcome.name}) to ${result.outcome.installDir}`,
     );
     flush();
     logSuccess(`Installed ${result.outcome.id} into ${scope} scope`);
@@ -239,7 +265,14 @@ export async function addCommand(opts: AddOptions): Promise<number> {
       failed.push({ subpath, error: (err as Error).message });
       continue;
     }
-    const result = await installOne(ctx, subRoot, perSkillLocator, undefined, lock, registry);
+    const result = await installOne(
+      ctx,
+      subRoot,
+      perSkillLocator,
+      undefined,
+      lock,
+      registry,
+    );
     if ("error" in result) {
       failed.push({ subpath, error: result.error });
       continue;
