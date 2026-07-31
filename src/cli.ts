@@ -15,7 +15,9 @@ const program = new Command();
 
 program
   .name("skills-engine")
-  .description("VibePod Skills Engine — manage skills inside a controlled container")
+  .description(
+    "VibePod Skills Engine — manage skills inside a controlled container",
+  )
   .version("0.1.0")
   .option("--json", "Emit machine-readable JSON on stdout");
 
@@ -26,7 +28,10 @@ function scopeOption(): Option {
 }
 
 function optionalScopeOption(): Option {
-  return new Option("--scope <scope>", "Filter by scope").choices(["local", "user"]);
+  return new Option("--scope <scope>", "Filter by scope").choices([
+    "local",
+    "user",
+  ]);
 }
 
 interface GlobalOpts {
@@ -45,11 +50,22 @@ program
   .addOption(scopeOption())
   .option("--id <id>", "Override the derived skill ID")
   .option("--link", "Symlink instead of copy (local sources only)")
-  .action(async (locator: string, opts: { scope: Scope; id?: string; link?: boolean }, cmd: Command) => {
-    setupOutput(cmd);
-    const rc = await addCommand({ locator, scope: opts.scope, id: opts.id, link: opts.link });
-    process.exit(rc);
-  });
+  .action(
+    async (
+      locator: string,
+      opts: { scope: Scope; id?: string; link?: boolean },
+      cmd: Command,
+    ) => {
+      setupOutput(cmd);
+      const rc = await addCommand({
+        locator,
+        scope: opts.scope,
+        id: opts.id,
+        link: opts.link,
+      });
+      process.exit(rc);
+    },
+  );
 
 program
   .command("delete <id>")
@@ -85,11 +101,13 @@ program
   .command("update [id]")
   .description("Re-resolve locators and rewrite the lockfile")
   .addOption(scopeOption())
-  .action(async (id: string | undefined, opts: { scope: Scope }, cmd: Command) => {
-    setupOutput(cmd);
-    const rc = await updateCommand({ scope: opts.scope, id });
-    process.exit(rc);
-  });
+  .action(
+    async (id: string | undefined, opts: { scope: Scope }, cmd: Command) => {
+      setupOutput(cmd);
+      const rc = await updateCommand({ scope: opts.scope, id });
+      process.exit(rc);
+    },
+  );
 
 program
   .command("validate <path>")

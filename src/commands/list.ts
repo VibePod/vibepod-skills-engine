@@ -1,10 +1,10 @@
 import path from "node:path";
 
 import { loadLockfile } from "../registry/lockfile.js";
-import type { LockEntry } from "../validation/skill-schema.js";
 import { exists } from "../utils/fs.js";
 import { emit, flush } from "../utils/output.js";
 import { bothScopes, paths, type Scope } from "../utils/paths.js";
+import type { LockEntry } from "../validation/skill-schema.js";
 
 export interface ListOptions {
   scope?: Scope;
@@ -35,7 +35,9 @@ function deriveVersion(entry: LockEntry): string {
   return "-";
 }
 
-async function rowsForScope(scope: Scope): Promise<Array<{ entry: LockEntry; scope: Scope; present: boolean }>> {
+async function rowsForScope(
+  scope: Scope,
+): Promise<Array<{ entry: LockEntry; scope: Scope; present: boolean }>> {
   const lock = await loadLockfile(scope);
   const result = [];
   for (const entry of Object.values(lock.skills)) {
@@ -53,8 +55,12 @@ export async function listCommand(opts: ListOptions): Promise<number> {
   }
 
   // Shadowing: local wins; userEntry with same id as a local entry → shadowed.
-  const localIds = new Set(all.filter((r) => r.scope === "local").map((r) => r.entry.id));
-  const userIds = new Set(all.filter((r) => r.scope === "user").map((r) => r.entry.id));
+  const localIds = new Set(
+    all.filter((r) => r.scope === "local").map((r) => r.entry.id),
+  );
+  const userIds = new Set(
+    all.filter((r) => r.scope === "user").map((r) => r.entry.id),
+  );
 
   const rows: ListRow[] = all.map((r) => {
     let status: ListRow["status"] = r.present ? "active" : "missing";
@@ -83,7 +89,9 @@ export async function listCommand(opts: ListOptions): Promise<number> {
     };
   });
 
-  rows.sort((a, b) => (a.id === b.id ? a.scope.localeCompare(b.scope) : a.id.localeCompare(b.id)));
+  rows.sort((a, b) =>
+    a.id === b.id ? a.scope.localeCompare(b.scope) : a.id.localeCompare(b.id),
+  );
 
   emit({ command: "list", scopes, skills: rows }, () => renderTable(rows));
   flush();
@@ -119,6 +127,7 @@ function renderTable(rows: ListRow[]): string {
 }
 
 function statusLabel(r: ListRow): string {
-  if (r.status === "shadowed" && r.shadowedBy) return `shadowed by ${r.shadowedBy}`;
+  if (r.status === "shadowed" && r.shadowedBy)
+    return `shadowed by ${r.shadowedBy}`;
   return r.status;
 }

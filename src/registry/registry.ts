@@ -1,6 +1,6 @@
-import { paths, type Scope } from "../utils/paths.js";
 import { readJson, writeJson } from "../utils/fs.js";
-import { RegistrySchema, type Registry } from "../validation/skill-schema.js";
+import { paths, type Scope } from "../utils/paths.js";
+import { type Registry, RegistrySchema } from "../validation/skill-schema.js";
 
 const EMPTY: Registry = { version: 1, skills: {} };
 
@@ -15,7 +15,10 @@ export async function loadRegistry(scope: Scope): Promise<Registry> {
   return parsed.data;
 }
 
-export async function saveRegistry(scope: Scope, registry: Registry): Promise<void> {
+export async function saveRegistry(
+  scope: Scope,
+  registry: Registry,
+): Promise<void> {
   await writeJson(paths(scope).registry, registry);
 }
 

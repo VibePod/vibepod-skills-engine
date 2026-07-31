@@ -20,15 +20,21 @@ function repoUrl(parsed: ParsedLocator): string {
 }
 
 function cacheKey(url: string, ref: string | undefined): string {
-  const h = crypto.createHash("sha1").update(`${url}@${ref ?? "HEAD"}`).digest("hex");
-  return h.slice(0, 12);
+  const h = crypto
+    .createHash("sha256")
+    .update(`${url}@${ref ?? "HEAD"}`)
+    .digest("hex");
+  return h.slice(0, 32);
 }
 
 function looksLikeCommit(ref: string): boolean {
   return /^[a-f0-9]{4,40}$/i.test(ref);
 }
 
-export async function fetchGit(parsed: ParsedLocator, ctx: FetchContext): Promise<ResolvedSource> {
+export async function fetchGit(
+  parsed: ParsedLocator,
+  ctx: FetchContext,
+): Promise<ResolvedSource> {
   const url = repoUrl(parsed);
   const ref = parsed.ref;
   const key = cacheKey(url, ref);
@@ -60,7 +66,9 @@ export async function fetchGit(parsed: ParsedLocator, ctx: FetchContext): Promis
       } catch (commitErr) {
         await removeDir(target);
         const detail = (commitErr as Error).message.split("\n")[0];
-        throw new Error(`Could not resolve git commit "${ref}" on ${url}: ${detail}`);
+        throw new Error(
+          `Could not resolve git commit "${ref}" on ${url}: ${detail}`,
+        );
       }
     }
   } else {
@@ -68,7 +76,9 @@ export async function fetchGit(parsed: ParsedLocator, ctx: FetchContext): Promis
       await simpleGit().clone(url, target, ["--depth=1"]);
     } catch (err) {
       await removeDir(target);
-      throw new Error(`Failed to clone ${url}: ${(err as Error).message.split("\n")[0]}`);
+      throw new Error(
+        `Failed to clone ${url}: ${(err as Error).message.split("\n")[0]}`,
+      );
     }
   }
 
@@ -76,7 +86,10 @@ export async function fetchGit(parsed: ParsedLocator, ctx: FetchContext): Promis
 
   return {
     type: "git",
-    provider: parsed.type === "github" || parsed.type === "gitlab" ? parsed.type : "git",
+    provider:
+      parsed.type === "github" || parsed.type === "gitlab"
+        ? parsed.type
+        : "git",
     dir: target,
     subpath: parsed.subpath,
     ref,

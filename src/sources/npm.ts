@@ -6,12 +6,21 @@ import pacote from "pacote";
 import { ensureDir, removeDir } from "../utils/fs.js";
 import type { FetchContext, ParsedLocator, ResolvedSource } from "./types.js";
 
-export async function fetchNpm(parsed: ParsedLocator, ctx: FetchContext): Promise<ResolvedSource> {
+export async function fetchNpm(
+  parsed: ParsedLocator,
+  ctx: FetchContext,
+): Promise<ResolvedSource> {
   if (parsed.type !== "npm" || !parsed.package) {
     throw new Error(`fetchNpm called with non-npm locator: ${parsed.raw}`);
   }
-  const spec = parsed.version ? `${parsed.package}@${parsed.version}` : parsed.package;
-  const key = crypto.createHash("sha1").update(spec).digest("hex").slice(0, 12);
+  const spec = parsed.version
+    ? `${parsed.package}@${parsed.version}`
+    : parsed.package;
+  const key = crypto
+    .createHash("sha256")
+    .update(spec)
+    .digest("hex")
+    .slice(0, 32);
   const target = path.join(ctx.cacheDir, "npm", key);
 
   await removeDir(target);

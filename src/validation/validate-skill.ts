@@ -3,7 +3,10 @@ import path from "node:path";
 
 import matter, { type GrayMatterFile } from "gray-matter";
 
-import { SkillFrontmatterSchema, type SkillFrontmatter } from "./skill-schema.js";
+import {
+  type SkillFrontmatter,
+  SkillFrontmatterSchema,
+} from "./skill-schema.js";
 
 export interface ValidationResult {
   ok: boolean;
@@ -13,7 +16,9 @@ export interface ValidationResult {
   body?: string;
 }
 
-export async function validateSkill(skillDir: string): Promise<ValidationResult> {
+export async function validateSkill(
+  skillDir: string,
+): Promise<ValidationResult> {
   const errors: string[] = [];
   const skillMd = path.join(skillDir, "SKILL.md");
 
@@ -23,9 +28,17 @@ export async function validateSkill(skillDir: string): Promise<ValidationResult>
   } catch (err) {
     const e = err as NodeJS.ErrnoException;
     if (e.code === "ENOENT") {
-      return { ok: false, path: skillDir, errors: [`SKILL.md not found at ${skillMd}`] };
+      return {
+        ok: false,
+        path: skillDir,
+        errors: [`SKILL.md not found at ${skillMd}`],
+      };
     }
-    return { ok: false, path: skillDir, errors: [`Failed to read SKILL.md: ${e.message}`] };
+    return {
+      ok: false,
+      path: skillDir,
+      errors: [`Failed to read SKILL.md: ${e.message}`],
+    };
   }
 
   let parsed: GrayMatterFile<string>;
@@ -46,7 +59,8 @@ export async function validateSkill(skillDir: string): Promise<ValidationResult>
   const fmResult = SkillFrontmatterSchema.safeParse(parsed.data);
   if (!fmResult.success) {
     for (const issue of fmResult.error.issues) {
-      const where = issue.path.length > 0 ? issue.path.join(".") : "frontmatter";
+      const where =
+        issue.path.length > 0 ? issue.path.join(".") : "frontmatter";
       errors.push(`${where}: ${issue.message}`);
     }
   }

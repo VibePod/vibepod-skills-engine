@@ -5,7 +5,10 @@ import * as tar from "tar";
 
 import { ensureDir } from "./fs.js";
 
-export async function extractTarball(tarballPath: string, destination: string): Promise<void> {
+export async function extractTarball(
+  tarballPath: string,
+  destination: string,
+): Promise<void> {
   await ensureDir(destination);
   await pipeline(
     fs.createReadStream(tarballPath),
@@ -13,7 +16,11 @@ export async function extractTarball(tarballPath: string, destination: string): 
   );
 }
 
-export async function copySubpath(source: string, subpath: string | undefined, dest: string): Promise<string> {
+export async function copySubpath(
+  source: string,
+  subpath: string | undefined,
+  dest: string,
+): Promise<string> {
   const from = subpath ? path.join(source, subpath) : source;
   await ensureDir(path.dirname(dest));
   const fsExtra = await import("fs-extra");

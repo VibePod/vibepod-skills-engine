@@ -16,7 +16,10 @@ export async function validateCommand(skillPath: string): Promise<number> {
     },
     () => {
       if (result.ok) return `validate ${abs}: OK`;
-      return [`validate ${abs}: FAIL`, ...result.errors.map((e) => `  - ${e}`)].join("\n");
+      return [
+        `validate ${abs}: FAIL`,
+        ...result.errors.map((e) => `  - ${e}`),
+      ].join("\n");
     },
   );
   flush();

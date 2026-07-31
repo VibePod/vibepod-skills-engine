@@ -6,10 +6,13 @@ import { parseLocator } from "./locator.js";
 import { fetchNpm } from "./npm.js";
 import type { FetchContext, ParsedLocator, ResolvedSource } from "./types.js";
 
-export { parseLocator };
 export type { FetchContext, ParsedLocator, ResolvedSource };
+export { parseLocator };
 
-export async function fetchSource(locator: string, ctx: FetchContext): Promise<ResolvedSource> {
+export async function fetchSource(
+  locator: string,
+  ctx: FetchContext,
+): Promise<ResolvedSource> {
   const parsed = parseLocator(locator);
   switch (parsed.type) {
     case "local":

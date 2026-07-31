@@ -1,6 +1,10 @@
-import { paths, type Scope } from "../utils/paths.js";
 import { readJson, writeJson } from "../utils/fs.js";
-import { LockfileSchema, type LockEntry, type Lockfile } from "../validation/skill-schema.js";
+import { paths, type Scope } from "../utils/paths.js";
+import {
+  type LockEntry,
+  type Lockfile,
+  LockfileSchema,
+} from "../validation/skill-schema.js";
 
 const EMPTY: Lockfile = { version: 1, skills: {} };
 
@@ -15,7 +19,10 @@ export async function loadLockfile(scope: Scope): Promise<Lockfile> {
   return parsed.data;
 }
 
-export async function saveLockfile(scope: Scope, lock: Lockfile): Promise<void> {
+export async function saveLockfile(
+  scope: Scope,
+  lock: Lockfile,
+): Promise<void> {
   await writeJson(paths(scope).lockfile, lock);
 }
 

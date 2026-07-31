@@ -12,7 +12,10 @@ function expandTilde(p: string): string {
   return p;
 }
 
-export async function fetchLocal(parsed: ParsedLocator, _ctx: FetchContext): Promise<ResolvedSource> {
+export async function fetchLocal(
+  parsed: ParsedLocator,
+  _ctx: FetchContext,
+): Promise<ResolvedSource> {
   if (parsed.type !== "local" || !parsed.path) {
     throw new Error(`fetchLocal called with non-local locator: ${parsed.raw}`);
   }

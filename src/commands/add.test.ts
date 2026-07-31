@@ -17,7 +17,8 @@ beforeEach(async () => {
   localSkills = path.join(tmp, "local");
   userSkills = path.join(tmp, "user");
   cache = path.join(tmp, "cache");
-  for (const d of [localSkills, userSkills, cache]) await fs.mkdir(d, { recursive: true });
+  for (const d of [localSkills, userSkills, cache])
+    await fs.mkdir(d, { recursive: true });
   process.env.VIBEPOD_LOCAL_SKILLS = localSkills;
   process.env.VIBEPOD_USER_SKILLS = userSkills;
   process.env.VIBEPOD_CACHE = cache;
@@ -42,12 +43,21 @@ it("installs a local skill and writes registry + lock", async () => {
   const rc = await addCommand({ locator: src, scope: "local" });
   expect(rc).toBe(0);
 
-  const installed = path.join(localSkills, "installed", "researcher", "SKILL.md");
+  const installed = path.join(
+    localSkills,
+    "installed",
+    "researcher",
+    "SKILL.md",
+  );
   await expect(fs.access(installed)).resolves.toBeUndefined();
 
-  const reg = JSON.parse(await fs.readFile(path.join(localSkills, "skills.json"), "utf-8"));
+  const reg = JSON.parse(
+    await fs.readFile(path.join(localSkills, "skills.json"), "utf-8"),
+  );
   expect(reg.skills.researcher.id).toBe("researcher");
-  const lock = JSON.parse(await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"));
+  const lock = JSON.parse(
+    await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"),
+  );
   expect(lock.skills.researcher.name).toBe("Researcher");
 
   await listCommand({}); // should not throw
@@ -97,7 +107,9 @@ it("installs a bundle of skills from a directory with no SKILL.md at root", asyn
     fs.access(path.join(localSkills, "installed", "docs", "SKILL.md")),
   ).rejects.toBeTruthy();
 
-  const lock = JSON.parse(await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"));
+  const lock = JSON.parse(
+    await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"),
+  );
   expect(Object.keys(lock.skills).sort()).toEqual(["alpha", "beta"]);
   // per-skill locators should be expanded
   expect(lock.skills.alpha.source.locator).toBe(`${bundle}/alpha`);
@@ -131,7 +143,9 @@ it("detects a skills/ subdirectory as a bundle (obra/superpowers shape)", async 
     fs.access(path.join(localSkills, "installed", "beta", "SKILL.md")),
   ).resolves.toBeUndefined();
 
-  const lock = JSON.parse(await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"));
+  const lock = JSON.parse(
+    await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"),
+  );
   expect(lock.skills.alpha.source.locator).toBe(`${root}/skills/alpha`);
 });
 
@@ -156,7 +170,9 @@ it("installs a skill from a bare relative path", async () => {
     fs.access(path.join(localSkills, "installed", "bare", "SKILL.md")),
   ).resolves.toBeUndefined();
 
-  const lock = JSON.parse(await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"));
+  const lock = JSON.parse(
+    await fs.readFile(path.join(localSkills, "skills-lock.json"), "utf-8"),
+  );
   expect(lock.skills.bare.source.locator).toBe("bare-src");
 });
 

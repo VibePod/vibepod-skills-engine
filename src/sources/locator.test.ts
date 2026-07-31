@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { expandBundleLocator, parseLocator, pinLocatorToResolved } from "./locator.js";
+import {
+  expandBundleLocator,
+  parseLocator,
+  pinLocatorToResolved,
+} from "./locator.js";
 import type { ResolvedSource } from "./types.js";
 
 describe("parseLocator", () => {
@@ -13,7 +17,10 @@ describe("parseLocator", () => {
   });
 
   it("parses local absolute paths", () => {
-    expect(parseLocator("/abs/path")).toMatchObject({ type: "local", path: "/abs/path" });
+    expect(parseLocator("/abs/path")).toMatchObject({
+      type: "local",
+      path: "/abs/path",
+    });
   });
 
   it("parses bare relative paths as local", () => {
@@ -47,7 +54,9 @@ describe("parseLocator", () => {
   });
 
   it("parses generic https git URL without a subpath", () => {
-    expect(parseLocator("https://git.example.com/org/repo.git#main")).toMatchObject({
+    expect(
+      parseLocator("https://git.example.com/org/repo.git#main"),
+    ).toMatchObject({
       type: "git",
       url: "https://git.example.com/org/repo.git",
       subpath: undefined,
@@ -56,7 +65,9 @@ describe("parseLocator", () => {
   });
 
   it("parses scp-style git URL with a subpath", () => {
-    expect(parseLocator("git@git.example.com:org/repo.git//skills/foo#v1")).toMatchObject({
+    expect(
+      parseLocator("git@git.example.com:org/repo.git//skills/foo#v1"),
+    ).toMatchObject({
       type: "git",
       url: "git@git.example.com:org/repo.git",
       subpath: "skills/foo",
@@ -76,21 +87,29 @@ describe("parseLocator", () => {
   });
 
   it("still rejects unknown schemes rather than treating them as paths", () => {
-    expect(() => parseLocator("ftp://example.com/foo")).toThrow(/Unrecognized locator/);
-    expect(() => parseLocator("mailto:someone@example.com")).toThrow(/Unrecognized locator/);
+    expect(() => parseLocator("ftp://example.com/foo")).toThrow(
+      /Unrecognized locator/,
+    );
+    expect(() => parseLocator("mailto:someone@example.com")).toThrow(
+      /Unrecognized locator/,
+    );
   });
 
   it("still enforces the trusted-sources allowlist for bare paths", () => {
     process.env.VIBEPOD_TRUSTED_SOURCES = "github:vibepod/";
     try {
-      expect(() => parseLocator("skills/foo")).toThrow(/VIBEPOD_TRUSTED_SOURCES/);
+      expect(() => parseLocator("skills/foo")).toThrow(
+        /VIBEPOD_TRUSTED_SOURCES/,
+      );
     } finally {
       delete process.env.VIBEPOD_TRUSTED_SOURCES;
     }
   });
 
   it("parses github with subpath and ref", () => {
-    const parsed = parseLocator("github:vibepod/vibepod-skills//skills/researcher#v1.0.0");
+    const parsed = parseLocator(
+      "github:vibepod/vibepod-skills//skills/researcher#v1.0.0",
+    );
     expect(parsed).toMatchObject({
       type: "github",
       repo: "vibepod/vibepod-skills",
@@ -126,7 +145,9 @@ describe("parseLocator", () => {
   });
 
   it("parses npm package with version", () => {
-    expect(parseLocator("npm:@acme/vibepod-skill-researcher@1.2.0")).toMatchObject({
+    expect(
+      parseLocator("npm:@acme/vibepod-skill-researcher@1.2.0"),
+    ).toMatchObject({
       type: "npm",
       package: "@acme/vibepod-skill-researcher",
       version: "1.2.0",
@@ -134,7 +155,9 @@ describe("parseLocator", () => {
   });
 
   it("parses generic https git URL", () => {
-    expect(parseLocator("https://git.example.com/org/repo.git//skills/foo#v1.0.0")).toMatchObject({
+    expect(
+      parseLocator("https://git.example.com/org/repo.git//skills/foo#v1.0.0"),
+    ).toMatchObject({
       type: "git",
       url: "https://git.example.com/org/repo.git",
       subpath: "skills/foo",
@@ -159,9 +182,9 @@ describe("expandBundleLocator", () => {
   });
 
   it("preserves ref when expanding github", () => {
-    expect(expandBundleLocator("github:obra/superpowers//skills#v1.0.0", "tdd")).toBe(
-      "github:obra/superpowers//skills/tdd#v1.0.0",
-    );
+    expect(
+      expandBundleLocator("github:obra/superpowers//skills#v1.0.0", "tdd"),
+    ).toBe("github:obra/superpowers//skills/tdd#v1.0.0");
   });
 
   it("creates subpath when bundle locator has none", () => {
@@ -178,7 +201,10 @@ describe("expandBundleLocator", () => {
 
   it("expands generic https git URL", () => {
     expect(
-      expandBundleLocator("https://git.example.com/org/repo.git//skills#v1", "foo"),
+      expandBundleLocator(
+        "https://git.example.com/org/repo.git//skills#v1",
+        "foo",
+      ),
     ).toBe("https://git.example.com/org/repo.git//skills/foo#v1");
   });
 
@@ -205,16 +231,25 @@ function gitResolved(commit: string): ResolvedSource {
 describe("pinLocatorToResolved", () => {
   it("appends commit to a git locator with no ref", () => {
     expect(
-      pinLocatorToResolved("github:obra/superpowers//skills/x", gitResolved("abc123")),
+      pinLocatorToResolved(
+        "github:obra/superpowers//skills/x",
+        gitResolved("abc123"),
+      ),
     ).toBe("github:obra/superpowers//skills/x#abc123");
   });
 
   it("replaces an existing ref with the resolved commit", () => {
     expect(
-      pinLocatorToResolved("github:obra/superpowers//skills/x#main", gitResolved("abc123")),
+      pinLocatorToResolved(
+        "github:obra/superpowers//skills/x#main",
+        gitResolved("abc123"),
+      ),
     ).toBe("github:obra/superpowers//skills/x#abc123");
     expect(
-      pinLocatorToResolved("github:obra/superpowers//skills/x#v1.0.0", gitResolved("abc123")),
+      pinLocatorToResolved(
+        "github:obra/superpowers//skills/x#v1.0.0",
+        gitResolved("abc123"),
+      ),
     ).toBe("github:obra/superpowers//skills/x#abc123");
   });
 
@@ -230,9 +265,9 @@ describe("pinLocatorToResolved", () => {
     expect(pinLocatorToResolved("npm:@acme/vibepod-skill-foo", resolved)).toBe(
       "npm:@acme/vibepod-skill-foo@1.2.3",
     );
-    expect(pinLocatorToResolved("npm:@acme/vibepod-skill-foo@^1.0.0", resolved)).toBe(
-      "npm:@acme/vibepod-skill-foo@1.2.3",
-    );
+    expect(
+      pinLocatorToResolved("npm:@acme/vibepod-skill-foo@^1.0.0", resolved),
+    ).toBe("npm:@acme/vibepod-skill-foo@1.2.3");
   });
 
   it("leaves local locators unchanged", () => {

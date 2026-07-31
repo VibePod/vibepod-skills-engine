@@ -1,0 +1,3 @@
+ignored:
+  - DL3008 # pin apt versions — base image tracks debian stable
+failure-threshold: warning
