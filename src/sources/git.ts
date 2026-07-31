@@ -21,10 +21,10 @@ function repoUrl(parsed: ParsedLocator): string {
 
 function cacheKey(url: string, ref: string | undefined): string {
   const h = crypto
-    .createHash("sha1")
+    .createHash("sha256")
     .update(`${url}@${ref ?? "HEAD"}`)
     .digest("hex");
-  return h.slice(0, 12);
+  return h.slice(0, 32);
 }
 
 function looksLikeCommit(ref: string): boolean {

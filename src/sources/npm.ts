@@ -16,7 +16,11 @@ export async function fetchNpm(
   const spec = parsed.version
     ? `${parsed.package}@${parsed.version}`
     : parsed.package;
-  const key = crypto.createHash("sha1").update(spec).digest("hex").slice(0, 12);
+  const key = crypto
+    .createHash("sha256")
+    .update(spec)
+    .digest("hex")
+    .slice(0, 32);
   const target = path.join(ctx.cacheDir, "npm", key);
 
   await removeDir(target);
