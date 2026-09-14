@@ -58,6 +58,7 @@ jobs:
           image: ${{ env.IMAGE }}:${{ steps.meta.outputs.version }}
           format: spdx-json
           output-file: sbom.spdx.json
+          upload-release-assets: false
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@master
         with:
