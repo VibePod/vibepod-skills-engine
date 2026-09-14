@@ -10,6 +10,7 @@ import { updateCommand } from "./commands/update.js";
 import { validateCommand } from "./commands/validate.js";
 import { configureOutput, logError } from "./utils/output.js";
 import type { Scope } from "./utils/paths.js";
+import { getVersion } from "./utils/version.js";
 
 const program = new Command();
 
@@ -18,7 +19,7 @@ program
   .description(
     "VibePod Skills Engine — manage skills inside a controlled container",
   )
-  .version("0.1.0")
+  .version(getVersion())
   .option("--json", "Emit machine-readable JSON on stdout");
 
 function scopeOption(): Option {
