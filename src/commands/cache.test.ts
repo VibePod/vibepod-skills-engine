@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { afterEach, beforeEach, expect, it } from "vitest";
 
+import { cacheRoot } from "../utils/paths.js";
 import { cacheClearCommand } from "./cache.js";
 
 let cache: string;
@@ -43,4 +44,9 @@ it("keeps entries it does not own", async () => {
 
 it("succeeds on an empty cache", async () => {
   expect(await cacheClearCommand()).toBe(0);
+});
+
+it("ignores an empty VIBEPOD_CACHE instead of using the working directory", () => {
+  process.env.VIBEPOD_CACHE = "";
+  expect(cacheRoot()).toBe("/vibepod/cache");
 });
