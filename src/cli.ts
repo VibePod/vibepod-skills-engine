@@ -2,6 +2,7 @@
 import { Command, Option } from "commander";
 
 import { addCommand } from "./commands/add.js";
+import { cacheClearCommand } from "./commands/cache.js";
 import { deleteCommand } from "./commands/delete.js";
 import { listCommand } from "./commands/list.js";
 import { resolveCommand } from "./commands/resolve.js";
@@ -126,6 +127,19 @@ program
   .action(async (opts: { scope?: Scope }, cmd: Command) => {
     setupOutput(cmd);
     const rc = await resolveCommand({ scope: opts.scope });
+    process.exit(rc);
+  });
+
+const cache = program
+  .command("cache")
+  .description("Manage the source fetch cache");
+
+cache
+  .command("clear")
+  .description("Remove cached git clones and npm tarballs")
+  .action(async (_opts: unknown, cmd: Command) => {
+    setupOutput(cmd.parent ?? cmd);
+    const rc = await cacheClearCommand();
     process.exit(rc);
   });
 

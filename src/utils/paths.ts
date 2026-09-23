@@ -25,7 +25,8 @@ export function scopeRoot(scope: Scope): string {
 }
 
 export function cacheRoot(): string {
-  return process.env.VIBEPOD_CACHE ?? "/vibepod/cache";
+  const fromEnv = process.env.VIBEPOD_CACHE;
+  return fromEnv && fromEnv.length > 0 ? fromEnv : "/vibepod/cache";
 }
 
 export function paths(scope: Scope): SkillPaths {

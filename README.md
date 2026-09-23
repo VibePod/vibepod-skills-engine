@@ -20,6 +20,7 @@ skills-engine list [--scope local|user] [--json]
 skills-engine sync --scope local|user [--json]
 skills-engine validate <path> [--json]
 skills-engine resolve --scope local|user [--json]
+skills-engine cache clear [--json]
 ```
 
 ## Mounts
